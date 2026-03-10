@@ -33,56 +33,30 @@ function getShiftDuration(startTime, endTime){
 // endTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
 // Returns: string formatted as h:mm:ss
 // ============================================================
-function getIdleTime(startTime, endTime) {
-    // Parse time strings to total seconds
-    function parseTime(timeStr) {
-        const parts = timeStr.match(/(\d+):(\d+):(\d+)\s*(am|pm)/i);
-        let hours = parseInt(parts[1]);
-        const minutes = parseInt(parts[2]);
-        const seconds = parseInt(parts[3]);
-        const period = parts[4].toLowerCase();
-        
-        // Convert to 24-hour format
-        if (period === 'pm' && hours !== 12) {
-            hours += 12;
-        } else if (period === 'am' && hours === 12) {
-            hours = 0;
-        }
-        
-        return hours * 3600 + minutes * 60 + seconds;
+function getIdleTime(startTime,endTime){
+
+    function toSec(t){
+        let [h,m,s,p] = t.match(/(\d+):(\d+):(\d+)\s*(am|pm)/i).slice(1);
+        h=+h;
+        if(p==="pm" && h!=12) h+=12;
+        if(p==="am" && h==12) h=0;
+        return h*3600+m*60+ +s;
     }
-    
-    let startSeconds = parseTime(startTime);
-    let endSeconds = parseTime(endTime);
-    
-    // Handle case where end time is next day
-    if (endSeconds < startSeconds) {
-        endSeconds += 24 * 3600;
-    }
-    
-    // Delivery hours: 8:00 AM (8*3600) to 10:00 PM (22*3600)
-    const deliveryStart = 8 * 3600;
-    const deliveryEnd = 22 * 3600;
-    
-    let idleSeconds = 0;
-    
-    // Idle time before 8:00 AM
-    if (startSeconds < deliveryStart) {
-        const idleBeforeEnd = Math.min(endSeconds, deliveryStart);
-        idleSeconds += idleBeforeEnd - startSeconds;
-    }
-    
-    // Idle time after 10:00 PM
-    if (endSeconds > deliveryEnd) {
-        const idleAfterStart = Math.max(startSeconds, deliveryEnd);
-        idleSeconds += endSeconds - idleAfterStart;
-    }
-    
-    const hours = Math.floor(idleSeconds / 3600);
-    const minutes = Math.floor((idleSeconds % 3600) / 60);
-    const seconds = idleSeconds % 60;
-    
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    let start=toSec(startTime);
+    let end=toSec(endTime);
+    if(end<start) end+=86400;
+
+    let idle=0;
+
+    if(start < 8*3600) idle += Math.max(0, Math.min(end,8*3600)-start);
+if(end > 22*3600) idle += Math.max(0, end-Math.max(start,22*3600));
+
+    let h=Math.floor(idle/3600);
+    let m=Math.floor(idle%3600/60);
+    let s=idle%60;
+
+    return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
 // ============================================================
