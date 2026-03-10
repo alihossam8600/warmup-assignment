@@ -120,7 +120,7 @@ function addShiftRecord(textFile, shiftObj) {
         fileContent = '';
     }
     
-    const lines = fileContent.split('\n').filter(line => line.trim() !== '');
+    const lines = fileContent.trim().split('\n');
     
     // Check for duplicate (same driverID and date)
     for (let line of lines) {
@@ -129,58 +129,6 @@ function addShiftRecord(textFile, shiftObj) {
             return {};
         }
     }
-    
-    // Calculate all fields
-    const shiftDuration = getShiftDuration(shiftObj.startTime, shiftObj.endTime);
-    const idleTime = getIdleTime(shiftObj.startTime, shiftObj.endTime);
-    const activeTime = getActiveTime(shiftDuration, idleTime);
-    const quotaMet = metQuota(shiftObj.date, activeTime);
-    const hasBonus = false;
-    
-    // Create new record object
-    const newRecord = {
-        driverID: shiftObj.driverID,
-        driverName: shiftObj.driverName,
-        date: shiftObj.date,
-        startTime: shiftObj.startTime,
-        endTime: shiftObj.endTime,
-        shiftDuration: shiftDuration,
-        idleTime: idleTime,
-        activeTime: activeTime,
-        metQuota: quotaMet,
-        hasBonus: hasBonus
-    };
-    
-    // Create new line
-    const newLine = `${newRecord.driverID},${newRecord.driverName},${newRecord.date},${newRecord.startTime},${newRecord.endTime},${newRecord.shiftDuration},${newRecord.idleTime},${newRecord.activeTime},${newRecord.metQuota},${newRecord.hasBonus}`;
-    
-    // Find where to insert
-    let insertIndex = -1;
-    let lastDriverIndex = -1;
-    
-    for (let i = 0; i < lines.length; i++) {
-        const parts = lines[i].split(',');
-        if (parts[0] === shiftObj.driverID) {
-            lastDriverIndex = i;
-        }
-    }
-    
-    if (lastDriverIndex !== -1) {
-        // Insert after last record of same driver
-        insertIndex = lastDriverIndex + 1;
-    } else {
-        // Append at end
-        insertIndex = lines.length;
-    }
-    
-    // Insert the new line
-    lines.splice(insertIndex, 0, newLine);
-    
-    // Write back to file
-    fs.writeFileSync(textFile, lines.join('\n') + '\n', { encoding: 'utf8' });
-    
-    return newRecord;
-}
 
 // ============================================================
 // Function 6: setBonus(textFile, driverID, date, newValue)
