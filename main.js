@@ -6,42 +6,27 @@ const fs = require("fs");
 // endTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
 // Returns: string formatted as h:mm:ss
 // ============================================================
-function getShiftDuration(startTime, endTime) {
-    // Parse time strings to total seconds
-    function parseTime(timeStr) {
-        const parts = timeStr.match(/(\d+):(\d+):(\d+)\s*(am|pm)/i);
-        let hours = parseInt(parts[1]);
-        const minutes = parseInt(parts[2]);
-        const seconds = parseInt(parts[3]);
-        const period = parts[4].toLowerCase();
-        
-        // Convert to 24-hour format
-        if (period === 'pm' && hours !== 12) {
-            hours += 12;
-        } else if (period === 'am' && hours === 12) {
-            hours = 0;
-        }
-        
-        return hours * 3600 + minutes * 60 + seconds;
-    }
-    
-    let startSeconds = parseTime(startTime);
-    let endSeconds = parseTime(endTime);
-    
-    // Handle case where end time is next day
-    if (endSeconds < startSeconds) {
-        endSeconds += 24 * 3600;
-    }
-    
-    const durationSeconds = endSeconds - startSeconds;
-    
-    const hours = Math.floor(durationSeconds / 3600);
-    const minutes = Math.floor((durationSeconds % 3600) / 60);
-    const seconds = durationSeconds % 60;
-    
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
+function getShiftDuration(startTime, endTime){
 
+    function toSec(t){
+        let [h,m,s,p] = t.match(/(\d+):(\d+):(\d+)\s*(am|pm)/i).slice(1);
+        h = +h;
+        if(p==="pm" && h!=12) h+=12;
+        if(p==="am" && h==12) h=0;
+        return h*3600 + m*60 + +s;
+    }
+
+    let start = toSec(startTime);
+    let end = toSec(endTime);
+    if(end < start) end += 86400;
+
+    let sec = end-start;
+    let h=Math.floor(sec/3600);
+    let m=Math.floor(sec%3600/60);
+    let s=sec%60;
+
+    return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
 // ============================================================
 // Function 2: getIdleTime(startTime, endTime)
 // startTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
