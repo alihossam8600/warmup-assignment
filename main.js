@@ -65,26 +65,20 @@ if(end > 22*3600) idle += Math.max(0, end-Math.max(start,22*3600));
 // idleTime: (typeof string) formatted as h:mm:ss
 // Returns: string formatted as h:mm:ss
 // ============================================================
-function getActiveTime(shiftDuration, idleTime) {
-    // Parse time string to seconds
-    function parseTimeToSeconds(timeStr) {
-        const parts = timeStr.split(':');
-        const hours = parseInt(parts[0]);
-        const minutes = parseInt(parts[1]);
-        const seconds = parseInt(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
+function getActiveTime(shiftDuration,idleTime){
+
+    function toSec(t){
+        let [h,m,s] = t.split(":").map(Number);
+        return h*3600+m*60+s;
     }
-    
-    const shiftSeconds = parseTimeToSeconds(shiftDuration);
-    const idleSeconds = parseTimeToSeconds(idleTime);
-    
-    const activeSeconds = shiftSeconds - idleSeconds;
-    
-    const hours = Math.floor(activeSeconds / 3600);
-    const minutes = Math.floor((activeSeconds % 3600) / 60);
-    const seconds = activeSeconds % 60;
-    
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    let sec = toSec(shiftDuration) - toSec(idleTime);
+
+    let h=Math.floor(sec/3600);
+    let m=Math.floor(sec%3600/60);
+    let s=sec%60;
+
+    return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
 // ============================================================
