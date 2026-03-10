@@ -87,35 +87,21 @@ function getActiveTime(shiftDuration,idleTime){
 // activeTime: (typeof string) formatted as h:mm:ss
 // Returns: boolean
 // ============================================================
-function metQuota(date, activeTime) {
-    // Parse time string to seconds
-    function parseTimeToSeconds(timeStr) {
-        const parts = timeStr.split(':');
-        const hours = parseInt(parts[0]);
-        const minutes = parseInt(parts[1]);
-        const seconds = parseInt(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
-    }
-    
-    const activeSeconds = parseTimeToSeconds(activeTime);
-    
-    // Check if date is in Eid period (Apr 10-30, 2025)
-    const dateParts = date.split('-');
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]);
-    const day = parseInt(dateParts[2]);
-    
-    let quotaSeconds;
-    
-    if (year === 2025 && month === 4 && day >= 10 && day <= 30) {
-        // Eid period: 6 hours
-        quotaSeconds = 6 * 3600;
-    } else {
-        // Normal day: 8 hours 24 minutes
-        quotaSeconds = 8 * 3600 + 24 * 60;
-    }
-    
-    return activeSeconds >= quotaSeconds;
+function metQuota(date,activeTime){
+
+    let [h,m,s]=activeTime.split(":").map(Number);
+    let active=h*3600+m*60+s;
+
+   let dObj = new Date(date);
+let y = dObj.getFullYear();
+let mo = dObj.getMonth()+1;
+let d = dObj.getDate();
+
+    let quota = (y==2025 && mo==4 && d>=10 && d<=30)
+        ? 6*3600
+        : 8*3600+24*60;
+
+    return active>=quota;
 }
 
 // ============================================================
